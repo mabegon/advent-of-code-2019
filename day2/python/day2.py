@@ -27,7 +27,10 @@ def multiply(stack, headPosition):
     return stack
 
 def main():
-    print ("Answer: " + str(answer_day_2_1()))
+    print("Answer 1: " + str(answer_day_2_1()))
+    noun, verb = answer_day_2_2()
+    answer2 = 100 * noun + verb
+    print(str.format("Question 2: noun={}, verb={} , answer={}", noun, verb, answer2))
 
 def answer_day_2_1():
     stack = get_memory_stack()
@@ -36,6 +39,21 @@ def answer_day_2_1():
     stack = computeStack(stack)
 
     return stack[0]
+
+
+def getResult(stack):
+    return stack[0]
+
+
+def answer_day_2_2():
+    outputExpected = 19690720
+    for noun in range(100):
+        for verb in range(100):
+            stack = get_memory_stack()
+            stack[1] = noun
+            stack[2] = verb
+            if getResult(computeStack(stack)) == outputExpected:
+                return noun, verb
 
 def computeStack(stack):
     headPosition = 0
