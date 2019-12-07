@@ -23,8 +23,8 @@ def main():
         path1 = fp.readline()
         path2 = fp.readline()
 
-    print(str.format("result is: {}", resolvePuzzle(path1,path2)
-))
+    print(str.format("Result part1 is: {}", resolvePuzzle(path1, path2)))
+    print(str.format("Result part2 is: {}", resolvePuzzle2(path1, path2)))
 
 
 def getSections(path: str) -> [str]:
@@ -67,6 +67,10 @@ def intersections(pathPositionsWire1: dict, pathPositionsWire2: dict):
     intersection = pathPositionsWire1 & pathPositionsWire2
     return intersection
 
+def listIntersections(pathPositionsWire1: list, pathPositionsWire2: list):
+    intersection = list(set(pathPositionsWire1) & set(pathPositionsWire2))
+    return intersection
+
 def computeManhattanDistance(position1: Position, position2: Position):
     return abs(position1.x - position2.x) + abs(position1.y - position2.y)
 
@@ -91,7 +95,6 @@ def resolvePuzzle(path1, path2):
     centralPortPosition = Position(0, 0)
 
     positionsPath1 = getPositionsOnPath(centralPortPosition, path1)
-
     positionsPath2 = getPositionsOnPath(centralPortPosition, path2)
 
     intersec = intersections(positionsPath1, positionsPath2)
@@ -99,8 +102,44 @@ def resolvePuzzle(path1, path2):
     return getDistanceOfClosestIntersection(centralPortPosition, intersec)
 
 
+def getAllPositionsOnPath(centralPortPosition, path):
+    currentPosition = centralPortPosition
+    sectionsPath = getSections(path)
+    positionsPath = list()
+    for section in sectionsPath:
+        positionsOnSection = getPositionsOnSection(currentPosition, section)
+        positionsPath += positionsOnSection
+        currentPosition = positionsOnSection[len(positionsOnSection) - 1]
+    return positionsPath
 
 
+def getFewestCombinedStepsToIntersection(intersecs, positionsPath1, positionsPath2):
+    results = []
+    for pIntersec in intersecs:
+        steps1 = getStepsToIntersection(pIntersec, positionsPath1)
+        steps2 = getStepsToIntersection(pIntersec, positionsPath2)
+        results.append(steps1+steps2)
+    results.sort()
+    return results[0]
+
+def getStepsToIntersection(pIntersec, positionsPath1):
+    steps1 = 1
+    for pPath1 in positionsPath1:
+        if pPath1 == pIntersec:
+            break
+        steps1 += 1
+    return steps1
+
+def resolvePuzzle2(path1, path2):
+    centralPortPosition = Position(0, 0)
+
+    positionsPath1 = getAllPositionsOnPath(centralPortPosition, path1)
+    positionsPath2 = getAllPositionsOnPath(centralPortPosition, path2)
+
+    intersecs = listIntersections(positionsPath1, positionsPath2)
+
+    # todo Refactor this solution in order to pass only 1 time by each path
+    return getFewestCombinedStepsToIntersection(intersecs, positionsPath1, positionsPath2)
 
 
 if __name__ == '__main__':

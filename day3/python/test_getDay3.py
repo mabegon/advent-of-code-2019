@@ -126,4 +126,31 @@ class TestDay3(TestCase):
         expectedDistance = 135
         self.assertEqual(expectedDistance, day3.resolvePuzzle(path1, path2))
 
+    def test_getAllPositionsOnPath(self):
+        path = "R2,L1"
+        centralPosition = Position(0, 0)
+        positionsOnPathExpected = list([Position(1, 0), Position(2, 0), Position(1, 0)])
+
+        positionsOnPath = day3.getAllPositionsOnPath(centralPosition, path)
+
+        self.assertEqual(positionsOnPathExpected, positionsOnPath)
+
+    def test_day3_example1_part2(self):
+        path1 = "R8,U5,L5,D3"
+        path2 = "U7,R6,D4,L4"
+        expectedSteps = 30
+        self.assertEqual(expectedSteps, day3.resolvePuzzle2(path1, path2))
+
+    def test_day3_example2_part2(self):
+        path1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72"
+        path2 = "U62,R66,U55,R34,D71,R55,D58,R83"
+        expectedSteps = 610
+        self.assertEqual(expectedSteps, day3.resolvePuzzle2(path1, path2))
+
+    def test_day3_example3_part2(self):
+        path1 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51"
+        path2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7"
+        expectedSteps = 410
+        self.assertEqual(expectedSteps, day3.resolvePuzzle2(path1, path2))
+
 
