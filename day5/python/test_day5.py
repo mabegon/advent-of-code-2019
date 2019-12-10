@@ -50,6 +50,124 @@ class TestComputeStack(TestCase):
         self.assertEqual(0, param1Mode)
         self.assertEqual(0, param2Mode)
 
+    def test_computeStack_jumpIfTrue_when_false_with_position_mode(self):
+        stack = ["5", "4", "5", "1101", "0", "7", "0", "99"]
+        stackResult = day5.computeStack(stack)
+        self.assertEqual(["7", "4", "5", "1101", "0", "7", "0", "99"], stackResult)
+
+    def test_computeStack_jumpIfTrue_when_true_with_position_mode(self):
+        stack = ["5", "0", "5", "1101", "0", "7", "0", "99"]
+        stackResult = day5.computeStack(stack)
+        self.assertEqual(["5", "0", "5", "1101", "0", "7", "0", "99"], stackResult)
+
+    def test_jumpIfTrue_when_false_with_position_mode(self):
+        stack = ["5", "4", "5", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 0
+        param2Mode = 0
+        headPosition = day5.jumpIfTrue(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(3, headPosition)
+
+    def test_jumpIfTrue_when_true_with_position_mode(self):
+        stack = ["5", "0", "5", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 0
+        param2Mode = 0
+        headPosition = day5.jumpIfTrue(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(7, headPosition)
+
+    def test_jumpIfTrue_when_true_with_immediate_mode(self):
+        stack = ["5", "1", "0", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 1
+        param2Mode = 1
+        headPosition = day5.jumpIfTrue(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(0, headPosition)
+
+    def test_jumpIfTrue_when_false_with_immediate_mode(self):
+        stack = ["5", "0", "0", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 1
+        param2Mode = 1
+        headPosition = day5.jumpIfTrue(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(3, headPosition)
 
 
 
+    def test_jumpIfFalse_when_false_with_position_mode(self):
+        stack = ["6", "4", "5", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 0
+        param2Mode = 0
+        headPosition = day5.jumpIfFalse(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(7, headPosition)
+
+    def test_jumpIfFalse_when_true_with_position_mode(self):
+        stack = ["6", "0", "5", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 0
+        param2Mode = 0
+        headPosition = day5.jumpIfFalse(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(3, headPosition)
+
+    def test_jumpIfFalse_when_true_with_immediate_mode(self):
+        stack = ["6", "1", "0", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 1
+        param2Mode = 1
+        headPosition = day5.jumpIfFalse(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(3, headPosition)
+
+    def test_jumpIfFalse_when_false_with_immediate_mode(self):
+        stack = ["6", "0", "0", "1101", "0", "7", "0", "99"]
+        headPosition = 0
+        param1Mode = 1
+        param2Mode = 1
+        headPosition = day5.jumpIfFalse(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(0, headPosition)
+
+    def test_lessThan_when_is_true_with_position_mode(self):
+        stack = ["7", "1", "0", "0"]
+        stackExpected = ["1", "1", "0", "0"]
+        headPosition = 0
+        param1Mode = 0
+        param2Mode = 0
+        stack, headPosition = day5.opcode_lessThan(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(stackExpected, stack)
+        self.assertEqual(4, headPosition)
+
+    def test_lessThan_when_is_false_with_position_mode(self):
+        def test_lessThan_when_is_true_with_position_mode(self):
+            stack = ["7", "0", "1", "0"]
+            stackExpected = ["0", "0", "1", "0"]
+            headPosition = 0
+            param1Mode = 0
+            param2Mode = 0
+            stack, headPosition = day5.opcode_lessThan(stack, headPosition, param1Mode, param2Mode)
+            self.assertEqual(stackExpected, stack)
+            self.assertEqual(4, headPosition)
+
+    def test_lessThan_when_is_true_with_immediate_mode(self):
+        stack = ["7", "1", "2", "0"]
+        stackExpected = ["1", "1", "2", "0"]
+        headPosition = 0
+        param1Mode = 1
+        param2Mode = 1
+        stack, headPosition = day5.opcode_lessThan(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(stackExpected, stack)
+        self.assertEqual(4, headPosition)
+
+    def test_lessThan_when_is_false_with_immediate_mode(self):
+        stack = ["7", "1", "0", "0"]
+        stackExpected = ["0", "1", "0", "0"]
+        headPosition = 0
+        param1Mode = 1
+        param2Mode = 1
+        stack, headPosition = day5.opcode_lessThan(stack, headPosition, param1Mode, param2Mode)
+        self.assertEqual(stackExpected, stack)
+        self.assertEqual(4, headPosition)
+
+   # def test_computeStack_with_long_example(self):
+    #    stack = ["3","21","1008","21","8","20","1005","20","22","107","8","21","20","1006","20","31","1106","0","36","98","0","0","1002","21","125","20","4","20","1105","1","46","104","999","1105","1","46","1101","1000","1","20","4","20","1105","1","46","98","99"]
+
+    def test_computeStack_5(self):
