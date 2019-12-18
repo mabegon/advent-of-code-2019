@@ -23,7 +23,8 @@ class Computer(object):
     def get_memory_stack(filename):
         with open(filename) as fp:
             code = fp.read()
-            stack = code.split(',')
+            stack_str = code.split(',')
+            stack = [int(x) for x in stack_str]
             return stack
 
     def compute(self):
@@ -33,151 +34,154 @@ class Computer(object):
         stack = stack_in.copy()
         head_position = 0
         output_list = []
-        opcode, param1Mode, param2Mode = self.decodeOpcodeAndParamModes(stack[head_position])
+        input_values = list(inputs)
+        opcode, param1_mode, param2_mode = self.decodeOpcodeAndParamModes(stack[head_position])
 
         while opcode != OPCODE_HALT:
             if opcode == OPCODE_ADD:
-                stack, head_position = self.add(stack, head_position, param1Mode, param2Mode)
+                stack, head_position = self.add(stack, head_position, param1_mode, param2_mode)
             elif opcode == OPCODE_MULTIPLY:
-                stack, head_position = self.multiply(stack, head_position, param1Mode, param2Mode)
+                stack, head_position = self.multiply(stack, head_position, param1_mode, param2_mode)
             elif opcode == OPCODE_INPUT:
-                stack, head_position = self.opcode_input(stack, head_position, self.get_input_value(inputs))
+                stack, head_position = self.opcode_input(stack, head_position, self.get_input_value(input_values))
             elif opcode == OPCODE_OUTPUT:
                 head_position, output = self.opcode_output(stack, head_position)
                 output_list.append(output)
             elif opcode == OPCODE_JUMPIFTRUE:
-                head_position = self.jumpIfTrue(stack, head_position, param1Mode, param2Mode)
+                head_position = self.jumpIfTrue(stack, head_position, param1_mode, param2_mode)
             elif opcode == OPCODE_JUMPIFFALSE:
-                head_position = self.jumpIfFalse(stack, head_position, param1Mode, param2Mode)
+                head_position = self.jumpIfFalse(stack, head_position, param1_mode, param2_mode)
             elif opcode == OPCODE_LESSTHAN:
-                stack, head_position = self.opcode_lessThan(stack, head_position, param1Mode, param2Mode)
+                stack, head_position = self.opcode_lessThan(stack, head_position, param1_mode, param2_mode)
             elif opcode == OPCODE_EQUALS:
-                stack, head_position = self.opcode_equals(stack, head_position, param1Mode, param2Mode)
+                stack, head_position = self.opcode_equals(stack, head_position, param1_mode, param2_mode)
             else:
                 print("Stack error")
                 break
-            opcode, param1Mode, param2Mode = self.decodeOpcodeAndParamModes(stack[head_position])
+            opcode, param1_mode, param2_mode = self.decodeOpcodeAndParamModes(stack[head_position])
         return stack, output_list
 
     def get_input_value(self, inputs):
         if len(inputs) > 0:
-            input_value = list(inputs).pop(0)
+            input_value = inputs.pop(0)
         else:
             input_value = ""
         return input_value
 
-    def add(self, stack, headPosition, param1Mode, param2Mode):
-        op1, op2, storePosition = self.getOperationValues(headPosition, param1Mode, param2Mode, stack)
+    def add(self, stack, head_position, param1_mode, param2_mode):
+        op1, op2, store_position = self.getOperationValues(head_position, param1_mode, param2_mode, stack)
 
-        stack[storePosition] = str(op1 + op2)
-        return stack, headPosition + 4
-
-    def multiply(self, stack, head_position, param1Mode, param2Mode):
-        op1, op2, storePosition = self.getOperationValues(head_position, param1Mode, param2Mode, stack)
-        stack[storePosition] = str(op1 * op2)
+        stack[store_position] = op1 + op2
         return stack, head_position + 4
 
-    def opcode_input(self, stack, headPosition, value):
+    def multiply(self, stack, head_position, param1_mode, param2_mode):
+        op1, op2, store_position = self.getOperationValues(head_position, param1_mode, param2_mode, stack)
+        stack[store_position] = op1 * op2
+        return stack, head_position + 4
+
+    def opcode_input(self, stack, head_position, value):
 
         if value == "":
             value = input("Enter value: ")
 
-        position = int(stack[headPosition+1])
-        stack[position] = value
-        return stack, headPosition + 2
+        position = stack[head_position+1]
+        stack[position] = int(value)
 
-    def opcode_output(self, stack, headPosition):
-        position = int(stack[headPosition + 1])
+        return stack, head_position + 2
+
+    def opcode_output(self, stack, head_position):
+        position = stack[head_position + 1]
         value = stack[position]
-        return headPosition + 2, value
+        return head_position + 2, value
 
-    def jumpIfTrue(self, stack, headPosition, param1Mode, param2Mode):
+    def jumpIfTrue(self, stack, head_position, param1_mode, param2_mode):
 
-        condValue, jumpValue = self.getJumpOperationValues(headPosition, param1Mode, param2Mode, stack)
+        condValue, jumpValue = self.getJumpOperationValues(head_position, param1_mode, param2_mode, stack)
 
         if condValue > 0:
             return jumpValue
         else:
-            return headPosition + 3
+            return head_position + 3
 
 
-    def jumpIfFalse(self, stack, headPosition, param1Mode, param2Mode):
+    def jumpIfFalse(self, stack, head_position, param1_mode, param2_mode):
 
-        condValue, jumpValue = self.getJumpOperationValues(headPosition, param1Mode, param2Mode, stack)
+        condValue, jumpValue = self.getJumpOperationValues(head_position, param1_mode, param2_mode, stack)
 
         if condValue == 0:
             return jumpValue
         else:
-            return headPosition + 3
+            return head_position + 3
 
-    def opcode_lessThan(self, stack, headPosition, param1Mode, param2Mode):
-        op1, op2, storePosition = self.getOperationValues(headPosition, param1Mode, param2Mode, stack)
+    def opcode_lessThan(self, stack, head_position, param1_mode, param2_mode):
+        op1, op2, store_position = self.getOperationValues(head_position, param1_mode, param2_mode, stack)
 
         if op1 < op2:
-            stack[storePosition] = str(1)
+            stack[store_position] = 1
         else:
-            stack[storePosition] = str(0)
+            stack[store_position] = 0
 
-        return stack, headPosition + 4
+        return stack, head_position + 4
 
 
 
-    def opcode_equals(self, stack, headPosition, param1Mode, param2Mode):
-        op1, op2, storePosition = self.getOperationValues(headPosition, param1Mode, param2Mode, stack)
+    def opcode_equals(self, stack, head_position, param1_mode, param2_mode):
+        op1, op2, store_position = self.getOperationValues(head_position, param1_mode, param2_mode, stack)
 
         if op1 == op2:
-            stack[storePosition] = str(1)
+            stack[store_position] = 1
         else:
-            stack[storePosition] = str(0)
+            stack[store_position] = 0
 
-        return stack, headPosition + 4
+        return stack, head_position + 4
 
-    def getJumpOperationValues(self, headPosition, param1Mode, param2Mode, stack):
-        conditionParam = int(stack[headPosition + 1])
-        jumpToParam = int(stack[headPosition + 2])
-        if param1Mode == POSITION_MODE:
-            condValue = int(stack[conditionParam])
+    def getJumpOperationValues(self, head_position, param1_mode, param2_mode, stack):
+        conditionParam = stack[head_position + 1]
+        jumpToParam = stack[head_position + 2]
+        if param1_mode == POSITION_MODE:
+            condValue = stack[conditionParam]
         else:
             condValue = conditionParam
-        if param2Mode == POSITION_MODE:
-            jumpValue = int(stack[jumpToParam])
+        if param2_mode == POSITION_MODE:
+            jumpValue = stack[jumpToParam]
         else:
             jumpValue = jumpToParam
         return condValue, jumpValue
 
-    def decodeOpcodeAndParamModes(self, stackValue):
-        if len(stackValue) <= 2:
-           opcode = int(stackValue)
+    def decodeOpcodeAndParamModes(self, stack_value):
+
+        stack_value_str = str(stack_value)
+        if len(stack_value_str) <= 2:
+           opcode = int(stack_value_str)
         else:
-           opcode = int(stackValue[-1])
+           opcode = int(stack_value_str[-1])
 
-        param1Mode = POSITION_MODE
-        param2Mode = POSITION_MODE
+        param1_mode = POSITION_MODE
+        param2_mode = POSITION_MODE
 
-        if len(stackValue) >= 3:
-            param1Mode = int(stackValue[-3])
-        if len(stackValue) >= 4:
-            param2Mode = int(stackValue[-4])
+        if len(stack_value_str) >= 3:
+            param1_mode = int(stack_value_str[-3])
+        if len(stack_value_str) >= 4:
+            param2_mode = int(stack_value_str[-4])
 
-        return (opcode, param1Mode, param2Mode)
+        return (opcode, param1_mode, param2_mode)
 
-    def getOperationValues(self, headPosition, param1Mode, param2Mode, stack):
-        op1Value, op2Value, storePosition = self.getStackParameters(headPosition, stack)
+    def getOperationValues(self, head_position, param1_mode, param2_mode, stack):
+        op1Value, op2Value, store_position = self.getStackParameters(head_position, stack)
 
-        if param1Mode == POSITION_MODE:
+        if param1_mode == POSITION_MODE:
             op1 = stack[op1Value]
         else:
             op1 = op1Value
-        if param2Mode == POSITION_MODE:
+        if param2_mode == POSITION_MODE:
             op2 = stack[op2Value]
         else:
             op2 = op2Value
-        return int(op1), int(op2), int(storePosition)
+        return op1, op2, store_position
 
-
-    def getStackParameters(self, headPosition, stack):
-        op1Position = stack[headPosition + 1]
-        op2Position = stack[headPosition + 2]
-        storePosition = stack[headPosition + 3]
-        return int(op1Position), int(op2Position), int(storePosition)
+    def getStackParameters(self, head_position, stack):
+        op1Position = stack[head_position + 1]
+        op2Position = stack[head_position + 2]
+        store_position = stack[head_position + 3]
+        return op1Position, op2Position, store_position
 

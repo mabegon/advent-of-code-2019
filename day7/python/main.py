@@ -1,11 +1,16 @@
 from day7.python.computer import Computer
+from itertools import permutations
 
 def main():
     stack = Computer.get_memory_stack("../input.txt")
+    result = 0
+    for i in permutations([0,1,2,3,4]):
+        partial_result = compute_max_thruster_signal(stack, i[0], i[1], i[2], i[3], i[4])
+        if partial_result[0] > result:
+            result = partial_result[0]
+            print(str.format("Result {} for phases {},{},{},{},{}", result,i[0], i[1], i[2], i[3], i[4]))
 
-    result = compute_max_thruster_signal(stack)
-
-    print (str.format("The answer of part 1 is : {}", result))
+    print(str.format("The answer of part 1 is : {}", result))
 
 
 def compute_max_thruster_signal(stack, *phase_settings):
