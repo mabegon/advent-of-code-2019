@@ -1,3 +1,6 @@
+import queue
+from threading import Thread, RLock
+
 OPCODE_EQUALS = 8
 OPCODE_LESSTHAN = 7
 OPCODE_JUMPIFFALSE = 6
@@ -11,10 +14,15 @@ OPCODE_HALT = 99
 POSITION_MODE = 0
 
 
-class Computer(object):
+class Computer(Thread):
 
-    def __init__(self):
-        self.stack = []
+    def __init__(self, id, stack):
+        Thread.__init__(self)
+        self.stack = stack
+        self.input_queue = queue.Queue()
+        self.output_queue = queue.Queue()
+        self.id = id
+
 
     def load_stack(self, filename):
         self.stack = self.get_memory_stack(filename)
@@ -43,7 +51,7 @@ class Computer(object):
             elif opcode == OPCODE_MULTIPLY:
                 stack, head_position = self.multiply(stack, head_position, param1_mode, param2_mode)
             elif opcode == OPCODE_INPUT:
-                stack, head_position = self.opcode_input(stack, head_position, self.get_input_value(input_values))
+                stack, head_position = self.opcode_input(stack, head_position, self.get_input_value())
             elif opcode == OPCODE_OUTPUT:
                 head_position, output = self.opcode_output(stack, head_position)
                 output_list.append(output)
@@ -61,12 +69,47 @@ class Computer(object):
             opcode, param1_mode, param2_mode = self.decodeOpcodeAndParamModes(stack[head_position])
         return stack, output_list
 
-    def get_input_value(self, inputs):
+    def compute_stack_queue_version(self, stack_in):
+        stack = stack_in.copy()
+        head_position = 0
+        opcode, param1_mode, param2_mode = self.decodeOpcodeAndParamModes(stack[head_position])
+
+        while opcode != OPCODE_HALT:
+            if opcode == OPCODE_ADD:
+                stack, head_position = self.add(stack, head_position, param1_mode, param2_mode)
+            elif opcode == OPCODE_MULTIPLY:
+                stack, head_position = self.multiply(stack, head_position, param1_mode, param2_mode)
+            elif opcode == OPCODE_INPUT:
+                stack, head_position = self.opcode_input(stack, head_position)
+            elif opcode == OPCODE_OUTPUT:
+                head_position, output = self.opcode_output(stack, head_position)
+            elif opcode == OPCODE_JUMPIFTRUE:
+                head_position = self.jumpIfTrue(stack, head_position, param1_mode, param2_mode)
+            elif opcode == OPCODE_JUMPIFFALSE:
+                head_position = self.jumpIfFalse(stack, head_position, param1_mode, param2_mode)
+            elif opcode == OPCODE_LESSTHAN:
+                stack, head_position = self.opcode_lessThan(stack, head_position, param1_mode, param2_mode)
+            elif opcode == OPCODE_EQUALS:
+                stack, head_position = self.opcode_equals(stack, head_position, param1_mode, param2_mode)
+            else:
+                print("Stack error")
+                break
+            opcode, param1_mode, param2_mode = self.decodeOpcodeAndParamModes(stack[head_position])
+        return stack
+
+    def get_input_value_old(self, inputs):
         if len(inputs) > 0:
             input_value = inputs.pop(0)
         else:
             input_value = ""
         return input_value
+
+    def get_input_value(self):
+        print(str.format("[{}] Getting Input Value", self.id))
+        input_value = self.input_queue.get(True)
+        print(str.format("[{}] Input Value: {}", self.id, input_value))
+        return input_value
+
 
     def add(self, stack, head_position, param1_mode, param2_mode):
         op1, op2, store_position = self.getOperationValues(head_position, param1_mode, param2_mode, stack)
@@ -79,11 +122,8 @@ class Computer(object):
         stack[store_position] = op1 * op2
         return stack, head_position + 4
 
-    def opcode_input(self, stack, head_position, value):
-
-        if value == "":
-            value = input("Enter value: ")
-
+    def opcode_input(self, stack, head_position):
+        value = self.get_input_value()
         position = stack[head_position+1]
         stack[position] = int(value)
 
@@ -92,6 +132,7 @@ class Computer(object):
     def opcode_output(self, stack, head_position):
         position = stack[head_position + 1]
         value = stack[position]
+        self.output_queue.put(value, False)
         return head_position + 2, value
 
     def jumpIfTrue(self, stack, head_position, param1_mode, param2_mode):
@@ -185,3 +226,5 @@ class Computer(object):
         store_position = stack[head_position + 3]
         return op1Position, op2Position, store_position
 
+    def run(self) -> None:
+        self.compute_stack_queue_version(self.stack)
