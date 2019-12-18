@@ -105,9 +105,9 @@ class Computer(Thread):
         return input_value
 
     def get_input_value(self):
-        print(str.format("[{}] Getting Input Value", self.id))
+      #  print(str.format("[{}] Getting Input Value", self.id))
         input_value = self.input_queue.get(True)
-        print(str.format("[{}] Input Value: {}", self.id, input_value))
+       # print(str.format("[{}] Input Value: {}", self.id, input_value))
         return input_value
 
 
