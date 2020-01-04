@@ -1,5 +1,5 @@
 from unittest import TestCase
-from day8.python.main import get_layers, count_digits_of_layer, get_fewer_zeros_layer
+from day8.python.main import get_layers, count_digits_of_layer, get_fewer_zeros_layer, flat_layers
 
 
 class Test(TestCase):
@@ -51,3 +51,14 @@ class Test(TestCase):
         result_expected = 2
         result_layer = get_fewer_zeros_layer(input_value)
         self.assertEqual(result_layer, result_expected)
+
+    def test_flat_layers(self):
+        input_value = [["02","22"],["11","22"],["22","12"],["00","00"]]
+        image_wide = 2
+        image_tall = 2
+        result_expected = ["01", "10"]
+
+        result = flat_layers(input_value)
+
+        self.assertEqual(result_expected, result)
+
